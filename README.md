@@ -11,7 +11,7 @@ A file named `implicit-database-schema.png` was provided with the assignment, co
 ### Tasks Completed
 
 1. **1964 Olympic Games**: Used the `TRIM()` function to clean up spaces in fields. Retrieved information about the Olympic Games held in 1964, along with the city where they were hosted and the corresponding National Olympic Committee (NOC) to which the city belongs.
-2. **Top 10 Athletes by Participation**: Queried the top 10 athletes with the highest number of participations in Olympic Games.
+2. **Top 10 Athletes by Participation**: Queried the top 10 Croatian athletes with the highest number of participations in Olympic Games.
 3. **Top 10 Countries by Gold Medals in Athletics**: Retrieved the top 10 countries based on the number of athletes who won gold medals in athletics (post-1970).
 4. **Average Height of Female Athletes**: Queried the average height of female athletes born after 1980 who participated in games where Tamara Boroš competed, sorted by the year of the event.
 5. **Winter Games vs Calgary Comparison**: Compared Winter Olympic Games held from 1980 onwards with the games in Calgary, focusing on the difference in the average age of medalists.
