@@ -1,0 +1,142 @@
+1. ZADATAK
+
+MATCH (game:Game) SET game.gamesSeason = TRIM(game.gamesSeason)	// prvo mičemo višak praznih polja
+
+MATCH (game:Game {gamesYear:1964})-[:HELD_IN]->(city:City)-[:BELONGS_TO]->(noc:Noc)
+RETURN game, city.cityName, noc
+
+╒═══════════════════════════════════════════════════════════════════════════════════════════════╤═══════════════╤══════════════════════════════════╕
+│"game"                                                                                         │"city.cityName"│"noc"                             │
+╞═══════════════════════════════════════════════════════════════════════════════════════════════╪═══════════════╪══════════════════════════════════╡
+│{"gamesName":"XVIII Olympic Summer Games","gamesSeason":"Summer","gamesId":26,"gamesYear":1964}│"Tokyo"        │{"region":"Japan","nocId":"JPN"}  │
+├───────────────────────────────────────────────────────────────────────────────────────────────┼───────────────┼──────────────────────────────────┤
+│{"gamesName":"IX Olympic Winter Games","gamesSeason":"Winter","gamesId":25,"gamesYear":1964}   │"Innsbruck"    │{"region":"Austria","nocId":"AUT"}│
+└───────────────────────────────────────────────────────────────────────────────────────────────┴───────────────┴──────────────────────────────────┘
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. ZADATAK
+
+MATCH (croatianAthlete:Athlete)-[]->(participation:Participation)-[]->(croatia:Noc {nocId:'CRO'})
+RETURN croatianAthlete.athleteName, COUNT(participation) as brojNastupa
+ORDER BY brojNastupa DESC
+LIMIT 10
+
+╒═════════════════════════════╤═════════════╕
+│"croatianAthlete.athleteName"│"brojNastupa"│
+╞═════════════════════════════╪═════════════╡
+│"Ivica Kostelić"             │14           │
+├─────────────────────────────┼─────────────┤
+│"Natko Zrnčić-Dim"           │13           │
+├─────────────────────────────┼─────────────┤
+│"Janica Kostelić"            │12           │
+├─────────────────────────────┼─────────────┤
+│"Tina Erceg"                 │10           │
+├─────────────────────────────┼─────────────┤
+│"Duje Draganja"              │10           │
+├─────────────────────────────┼─────────────┤
+│"Zoran Primorac"             │9            │
+├─────────────────────────────┼─────────────┤
+│"Gordan Kožulj"              │9            │
+├─────────────────────────────┼─────────────┤
+│"Denis Klobučar"             │8            │
+├─────────────────────────────┼─────────────┤
+│"Tamara Boroš"               │8            │
+├─────────────────────────────┼─────────────┤
+│"Vedran Pavlek"              │8            │
+└─────────────────────────────┴─────────────┘
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. ZADATAK
+
+MATCH (goldenAthlete:Athlete)-[]->(goldenParticipation:Participation {medal:'Gold'})-[*..2]->(athletics:Sport {sportName:'Athletics'})
+WITH goldenAthlete,
+	 goldenParticipation
+MATCH (goldenParticipation)-[]->(post1970:Game)
+WHERE post1970.gamesYear > 1970
+WITH goldenAthlete,
+	 goldenParticipation
+MATCH (goldenAthlete)-[]->(goldenParticipation)-[]->(noc:Noc)
+RETURN noc.region, COUNT(DISTINCT goldenAthlete) AS number
+ORDER BY number DESC
+LIMIT 10
+
+╒════════════╤════════╕
+│"noc.region"│"number"│
+╞════════════╪════════╡
+│"USA"       │159     │
+├────────────┼────────┤
+│"Russia"    │85      │
+├────────────┼────────┤
+│"Germany"   │60      │
+├────────────┼────────┤
+│"Kenya"     │28      │
+├────────────┼────────┤
+│"Jamaica"   │19      │
+├────────────┼────────┤
+│"UK"        │19      │
+├────────────┼────────┤
+│"Ethiopia"  │11      │
+├────────────┼────────┤
+│"Bahamas"   │11      │
+├────────────┼────────┤
+│"Poland"    │11      │
+├────────────┼────────┤
+│"Italy"     │10      │
+└────────────┴────────┘
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. ZADATAK
+
+MATCH (tamara:Athlete {athleteName:'Tamara Boroš'})-[*..2]-(tamarineOI:Game)
+WITH tamarineOI
+MATCH (athlete:Athlete)-[*..2]-(tamarineOI)
+WHERE athlete.athleteGender ='F'
+AND athlete.athleteYob > 1980
+RETURN tamarineOI.gamesName AS OlympicGames, tamarineOI.gamesYear AS gamesYear, round(AVG(athlete.athleteHeight), 2) AS averageHeight
+
+╒═════════════════════════════╤═══════════╤═══════════════╕
+│"OlympicGames"               │"gamesYear"│"averageHeight"│
+╞═════════════════════════════╪═══════════╪═══════════════╡
+│"XXVI Olympic Summer Games"  │1996       │155.0          │
+├─────────────────────────────┼───────────┼───────────────┤
+│"XXVII Olympic Summer Games" │2000       │163.34         │
+├─────────────────────────────┼───────────┼───────────────┤
+│"XXVIII Olympic Summer Games"│2004       │167.24         │
+├─────────────────────────────┼───────────┼───────────────┤
+│"XXIX Olympic Summer Games"  │2008       │169.12         │
+└─────────────────────────────┴───────────┴───────────────┘
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. ZADATAK
+
+MATCH (athlete:Athlete)-[]->(medalWon:Participation)-[]->(calgaryGame:Game)-[]->(calgary:City {cityName:'Calgary'})
+WHERE medalWon.medal <> ''
+WITH AVG(calgaryGame.gamesYear - athlete.athleteYob) AS prosjek
+MATCH (athlete:Athlete)-[]->(medalWon:Participation)-[]->(game:Game)-[]->(city:City)
+WHERE medalWon.medal <> ''
+AND game.gamesSeason = 'Winter'
+AND game.gamesYear > 1980
+RETURN city.cityName, game.gamesYear, ROUND(AVG(game.gamesYear - athlete.athleteYob) - prosjek, 2) AS razlika
+ORDER BY razlika ASC
+
+╒════════════════╤════════════════╤═════════╕
+│"city.cityName" │"game.gamesYear"│"razlika"│
+╞════════════════╪════════════════╪═════════╡
+│"Sarajevo"      │1984            │-0.55    │
+├────────────────┼────────────────┼─────────┤
+│"Albertville"   │1992            │-0.32    │
+├────────────────┼────────────────┼─────────┤
+│"Calgary"       │1988            │0.0      │
+├────────────────┼────────────────┼─────────┤
+│"Lillehammer"   │1994            │0.34     │
+├────────────────┼────────────────┼─────────┤
+│"Nagano"        │1998            │1.17     │
+├────────────────┼────────────────┼─────────┤
+│"Sochi"         │2014            │1.75     │
+├────────────────┼────────────────┼─────────┤
+│"Vancouver"     │2010            │1.82     │
+├────────────────┼────────────────┼─────────┤
+│"Salt Lake City"│2002            │2.07     │
+├────────────────┼────────────────┼─────────┤
+│"Torino"        │2006            │2.44     │
+└────────────────┴────────────────┴─────────┘
